@@ -1,50 +1,54 @@
 # Contenido publicitario
 
-Dos propuestas de spot, una por negocio. Reemplazan al borrador anterior, que partía de un supuesto equivocado sobre qué es VitaSet.
+Dos spots animados de 30 segundos en formato vertical, uno por negocio. Cada archivo HTML contiene la animación, el sonido sintetizado y el guion.
 
-## Los negocios
+Los datos salen de los sitios oficiales, leídos el 9 de noviembre de 2026.
 
-| Negocio | Qué hace | Dónde | Fuente |
+| Negocio | Qué hace | Sitio | Archivo |
 |---|---|---|---|
-| VitaSet | Agua purificada, refrescos naturales y dispensadores a domicilio | Santa Cruz y Cochabamba | vitaset.es |
-| Importadora Almanza | Repuestos para autos pequeños y grandes | Quillacollo (Cochabamba) y Santa Cruz | importadora-almanza.com |
+| Importadora Almanza | Importa contenedores desde China y vende en tiendas propias de Cochabamba y Santa Cruz: herramientas, hogar, empaques, flores, automotriz y tecnología | importadoraalmanza.com | `spot-almanza.html` |
+| VitaSet | Agua purificada, refrescos naturales y dispensadores a domicilio en Santa Cruz y Cochabamba | vitaset.es | `spot-vitaset.html` |
 
-## 1. VitaSet · «Llega antes que la sed» · 30 s
+## Importadora Almanza · «Adentro del contenedor»
 
-Archivo: `spot-vitaset.html`. Es el spot animado, con sonido sintetizado y guion en la misma página.
-
-**Idea.** El spot empieza con el sonido del botellón cuando se acaba. Luego muestra la hora real de Bolivia y cambia el mensaje según falte o no para las 17:00, la hora límite para recibir el pedido el mismo día.
+**Idea.** Los primeros diez segundos pasan a oscuras. Quien mira viaja como si fuera la mercadería, con el seguimiento de la carga arriba, hasta que las puertas se abren en Cochabamba.
 
 | Tiempo | Imagen | Sonido y texto |
 |---|---|---|
-| 0:00 | Botellón casi vacío sobre su dispensador. Suben las últimas burbujas. | Tres glugs, cada uno más lento. «Ese sonido.» |
+| 0:00 | Negro. Se cierra una puerta de metal. El seguimiento marca la primera etapa. | Golpe y cerrojo. «Estás dentro de un contenedor.» |
+| 0:02 | La rendija de luz se mece. Puerto y océano. | Oleaje. «Viajas con 74.678 cosas más.» |
+| 0:05 | Vibración de carretera. Aduana. | Motor de camión. «Te eligieron directo en la fábrica.» |
+| 0:08 | Cochabamba. La rendija empieza a abrirse. | Cerrojo. «En Bolivia ya te están esperando.» |
+| 0:10 | Luz blanca. Un contador sube. | «74.678 unidades en el último contenedor.» |
+| 0:12 | Seis productos reales, del más barato al más caro. | Encendedor Bs 20, afilador Bs 22, raqueta Bs 65, cerezo Bs 130, colcha Bs 300, amoladora Bs 761. |
+| 0:21 | Azul marino. | «En stock hoy. Lo pides hoy, lo tienes hoy.» Cochabamba y Santa Cruz. |
+| 0:24 | | «¿No está aquí? Pídelo al mundo.» |
+| 0:26 | Logotipo y web. | «Importadora Almanza. Precio de importador, en stock hoy.» |
+
+**Producción.** La primera parte no necesita rodaje. Los productos usan las fotos de la tienda en línea. Solo hay que filmar la apertura real de un contenedor. El bloque de productos se cambia con cada carga.
+
+**Por ajustar.** Los nombres de las cinco etapas del seguimiento son una simplificación. Los precios hay que revisarlos el día de la pauta.
+
+## VitaSet · «Llega antes que la sed»
+
+**Idea.** El spot empieza con el sonido del botellón cuando se acaba. Luego muestra la hora real de Bolivia y cambia el final según el horario de reparto.
+
+| Tiempo | Imagen | Sonido y texto |
+|---|---|---|
+| 0:00 | Botellón casi vacío sobre su dispensador. | Tres glugs. «Ese sonido.» |
 | 0:04 | El botellón queda vacío. Cae una gota. | «El último vaso de la casa.» |
 | 0:07 | Reloj gigante con la hora real. | Segundero. «Son las 15:47. Todavía llegas.» |
 | 0:11 | Barra con el tiempo que queda hasta el corte. | «Te quedan 1 h 13 min. Pide antes de las 17:00. Llega hoy.» |
-| 0:15 | El agua sube y llena la pantalla. | «Envío gratis. Sin pedido mínimo.» Santa Cruz y Cochabamba. |
+| 0:15 | El agua sube y llena la pantalla. | «Envío gratis. Sin pedido mínimo. Recarga de 20 L a 15 Bs.» |
 | 0:20 | El agua cambia de color cinco veces. | Mocochinchi, tostada, canela, jamaica, tamarindo. «Refrescos naturales.» |
-| 0:26 | Azul limpio, marca y web. | Un glug lleno y un acorde. «VitaSet. Llega antes que la sed.» |
+| 0:26 | Blanco, logotipo y web. | «Llega antes que la sed.» |
 
-**Final alterno, después de las 17:00.** «El corte fue a las 17:00. Pídelo ahora. Mañana amaneces con agua.»
+**Tres finales según la hora.**
 
-Para televisión o radio se usa la versión fija de las 15:47 y se pauta por la tarde.
+| Momento | Texto |
+|---|---|
+| Antes de las 17:00 | «Todavía llegas.» |
+| De 17:00 a 18:00 | «Escríbenos igual. Si hay un repartidor cerca, llega hoy.» |
+| Fuera de horario | «Pídelo ahora. Mañana amaneces con agua.» El sábado por la tarde dice el lunes. |
 
-## 2. Importadora Almanza · «Póngalo y olvídese» · 30 s
-
-**Idea.** Un anuncio de repuestos que promete que no vas a volver pronto. Un buen repuesto se nota porque uno deja de pensar en él.
-
-| Tiempo | Imagen | Sonido y texto |
-|---|---|---|
-| 0:00 | Negro. 5:10 de la mañana. Un motor arranca al primer intento. | «¿Cuándo fue la última vez que pensaste en tu bomba de agua?» |
-| 0:04 | Un trufi lleno subiendo una cuesta, un camión de noche rumbo a Santa Cruz, una mamá que llega a tiempo al colegio. | Voz: «Exacto.» |
-| 0:09 | Dentro del motor. Piezas que giran limpias. | Voz: «Un buen repuesto hace una sola cosa bien: desaparecer. Lo pones y te olvidas.» |
-| 0:16 | Mostrador en Quillacollo. El vendedor entrega una caja. | Cliente: «Nos vemos.» Vendedor: «Ojalá que no tan pronto.» |
-| 0:23 | Logotipo sobre fondo liso. | Voz: «Importadora Almanza. Repuestos para autos pequeños y grandes. Cochabamba y Santa Cruz. Póngalo y olvídese.» |
-
-La pieza de la primera línea se cambia por la que más se vende en el mostrador.
-
-## Por confirmar antes de producir
-
-- Que el corte de las 17:00 para entrega el mismo día siga vigente.
-- Logotipo y colores oficiales de ambas marcas. El spot animado usa tipografía neutra.
-- Los precios quedaron fuera a propósito porque cambian.
+**Por confirmar.** El sitio no dice la hora de corte de los sábados y el spot asume las 14:00, la hora de cierre. El precio de la recarga hay que revisarlo el día de la pauta.
