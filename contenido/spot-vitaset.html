@@ -1,0 +1,610 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Llega antes que la sed</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: the film (9:16) stays pinned on the left while the working notes scroll beside it; on phones the film comes first, sized to fit one screen with its controls. */
+:root{
+  --paper:#F2F6FA; --surface:#FFFFFF; --ink:#0C1B2E; --muted:#4D6076; --line:#D2DDE9;
+  --water:#0A63C9; --on-water:#FFFFFF; --heat:#D9480F;
+  --font-display:"Barlow Condensed","Arial Narrow",Impact,sans-serif;
+  --font-body:"Barlow","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#07121F; --surface:#0E1D2F; --ink:#E9F1FA; --muted:#93A7BD; --line:#22364D;
+    --water:#58A9FF; --on-water:#04101D; --heat:#FF8A3D; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#07121F; --surface:#0E1D2F; --ink:#E9F1FA; --muted:#93A7BD; --line:#22364D;
+  --water:#58A9FF; --on-water:#04101D; --heat:#FF8A3D; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--ink); font-family:var(--font-body); font-size:17px; line-height:1.55;
+  padding-block:28px 64px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+.page{max-width:1080px; margin:0 auto; display:flex; flex-direction:column; gap:28px}
+.eyebrow{font-family:var(--font-display); font-weight:600; font-size:15px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:0}
+h1{font-family:var(--font-display); font-weight:900; font-size:clamp(44px, 9vw, 84px); line-height:.95; letter-spacing:-.01em; margin:6px 0 0; text-wrap:balance}
+.lede{font-size:clamp(18px, 2.4vw, 21px); max-width:38em; margin:14px 0 0; color:var(--ink)}
+.lede strong{color:var(--heat); font-weight:700}
+
+.grid{display:grid; grid-template-columns:1fr; gap:36px}
+@media (min-width:880px){
+  .grid{grid-template-columns:minmax(300px, 380px) minmax(0, 1fr); gap:56px; align-items:start}
+  .player{position:sticky; top:calc(env(safe-area-inset-top, 0px) + 20px)}
+}
+.player{display:flex; flex-direction:column; gap:14px; min-width:0}
+.stage{
+  position:relative; margin:0 auto; width:min(100%, calc((100svh - 250px) * 9 / 16)); min-width:230px; max-width:100%;
+  aspect-ratio:9 / 16; border-radius:18px; overflow:hidden; background:var(--water);
+  box-shadow:0 18px 40px -18px color-mix(in srgb, var(--ink) 55%, transparent);
+}
+.stage canvas{display:block; width:100%; height:100%}
+.bigplay{
+  position:absolute; left:50%; top:76%; transform:translate(-50%,-50%); width:92px; height:92px; border-radius:50%; border:0; cursor:pointer;
+  background:var(--ink); color:var(--paper); display:grid; place-items:center;
+  box-shadow:0 10px 30px -8px color-mix(in srgb, var(--ink) 70%, transparent);
+}
+.bigplay::before{content:""; display:block; margin-left:8px; border-style:solid; border-width:17px 0 17px 28px; border-color:transparent transparent transparent currentColor}
+.controls{display:flex; flex-wrap:wrap; gap:10px}
+.btn{
+  font-family:var(--font-display); font-weight:800; font-size:18px; letter-spacing:.04em; text-transform:uppercase;
+  padding:10px 16px; border-radius:10px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; flex:1 1 auto;
+}
+.btn.primary{background:var(--water); border-color:var(--water); color:var(--on-water)}
+.btn:focus-visible, .bigplay:focus-visible, .tc:focus-visible, .modes input:focus-visible + span, input[type=range]:focus-visible{outline:3px solid var(--heat); outline-offset:2px}
+.scrub{display:flex; align-items:center; gap:12px}
+.scrub input{flex:1 1 auto; min-width:0; accent-color:var(--water)}
+.scrub output{font-family:var(--font-display); font-weight:600; font-size:18px; font-variant-numeric:tabular-nums; color:var(--muted); white-space:nowrap}
+.modes{border:0; padding:0; margin:0; display:flex; flex-direction:column; gap:8px}
+.modes legend{font-family:var(--font-display); font-weight:600; font-size:14px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); padding:0; margin-bottom:8px}
+.modes .seg{display:flex; border:1.5px solid var(--line); border-radius:10px; overflow:hidden; background:var(--surface)}
+.modes label{flex:1 1 0; min-width:0; text-align:center; cursor:pointer}
+.modes input{position:absolute; opacity:0; pointer-events:none}
+.modes span{display:block; padding:9px 6px; font-family:var(--font-display); font-weight:800; font-size:16px; letter-spacing:.03em; text-transform:uppercase; color:var(--muted)}
+.modes input:checked + span{background:var(--ink); color:var(--paper)}
+.hint{font-size:14px; color:var(--muted); margin:0}
+
+.notes{display:flex; flex-direction:column; gap:44px; min-width:0}
+.notes section{display:flex; flex-direction:column; gap:14px}
+h2{font-family:var(--font-display); font-weight:900; font-size:clamp(30px, 4.6vw, 40px); line-height:1; margin:0; text-wrap:balance}
+.notes p{margin:0; max-width:36em}
+.claim{font-family:var(--font-display); font-weight:900; font-size:clamp(26px, 4vw, 34px); line-height:1.05; color:var(--water); margin:0}
+.guion{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; border-top:1.5px solid var(--line)}
+.guion li{display:grid; grid-template-columns:72px minmax(0, 1fr); gap:14px; padding:14px 0; border-bottom:1.5px solid var(--line); align-items:start}
+.tc{
+  font-family:var(--font-display); font-weight:800; font-size:19px; font-variant-numeric:tabular-nums; text-align:center;
+  padding:6px 0; border-radius:8px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink);
+}
+button.tc{cursor:pointer; color:var(--water); border-color:var(--water)}
+.guion .img{font-weight:500}
+.guion .snd{color:var(--muted); margin-top:4px}
+.guion q{quotes:"«" "»"; color:var(--ink); font-weight:600}
+.split{display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:14px}
+.card{background:var(--surface); border:1.5px solid var(--line); border-radius:12px; padding:16px 18px; display:flex; flex-direction:column; gap:6px; min-width:0}
+.card h3{font-family:var(--font-display); font-weight:800; font-size:20px; letter-spacing:.04em; text-transform:uppercase; margin:0; color:var(--muted)}
+.card p{font-size:16px}
+.card .big{font-family:var(--font-display); font-weight:900; font-size:28px; line-height:1.05; color:var(--heat)}
+.facts{margin:0; padding-left:1.1em; display:flex; flex-direction:column; gap:8px; max-width:38em}
+.facts a, .notes a{color:var(--water)}
+.rule{height:1.5px; background:var(--line); border:0; margin:0}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+</style>
+
+<div class="page">
+  <header>
+    <p class="eyebrow">Propuesta de spot · VitaSet · 30 segundos · vertical</p>
+    <h1>Llega antes que la sed</h1>
+    <p class="lede">Un spot que <strong>sabe qué hora es</strong>. Lee el reloj de Bolivia mientras lo miras y cambia el mensaje según cuánto falta para las 17:00, la hora límite para recibir el pedido el mismo día.</p>
+  </header>
+
+  <div class="grid">
+    <div class="player">
+      <figure class="stage" id="stage">
+        <canvas id="film" role="img" aria-label="Spot animado de VitaSet. El guion completo está escrito en la página."></canvas>
+        <button class="bigplay" id="bigplay" type="button" aria-label="Reproducir el spot"></button>
+      </figure>
+      <div class="controls">
+        <button class="btn primary" id="btn-play" type="button">Reproducir</button>
+        <button class="btn" id="btn-sound" type="button" aria-pressed="true">Sonido: sí</button>
+      </div>
+      <label class="scrub">
+        <input type="range" id="scrub" min="0" max="30" step="0.05" value="9.6" aria-label="Posición en el spot">
+        <output id="tlabel" for="scrub">0:09 / 0:30</output>
+      </label>
+      <fieldset class="modes">
+        <legend>Hora que usa el spot</legend>
+        <div class="seg">
+          <label><input type="radio" name="mode" id="mode-real" value="real" checked><span>Real</span></label>
+          <label><input type="radio" name="mode" id="mode-antes" value="antes"><span>15:47</span></label>
+          <label><input type="radio" name="mode" id="mode-despues" value="despues"><span>21:10</span></label>
+        </div>
+        <p class="hint" id="mode-hint"></p>
+      </fieldset>
+    </div>
+
+    <div class="notes">
+      <section>
+        <h2>La idea</h2>
+        <p>Todos conocen el sonido del botellón cuando se acaba. Es el momento exacto en que alguien necesita a VitaSet y todavía no lo sabe.</p>
+        <p>El spot empieza ahí, con ese sonido. Después hace algo que un anuncio normal no puede: muestra la hora real y responde a la única pregunta que importa en ese momento. ¿Alcanzo a tener agua hoy?</p>
+        <p class="claim">VitaSet. Llega antes que la sed.</p>
+      </section>
+
+      <section>
+        <h2>Guion</h2>
+        <p>Toca un tiempo para ver ese cuadro en la pantalla.</p>
+        <ol class="guion">
+          <li><button class="tc" type="button" data-t="2.2">0:00</button>
+            <div><p class="img">Media tarde, luz de calor. Un botellón casi vacío sobre su dispensador. Suben las últimas burbujas.</p>
+            <p class="snd">Tres glugs, cada uno más lento. Texto: <q>Ese sonido.</q></p></div></li>
+          <li><button class="tc" type="button" data-t="5.6">0:04</button>
+            <div><p class="img">El botellón queda vacío. Cae una sola gota del grifo.</p>
+            <p class="snd">Una gota contra la bandeja. Texto: <q>El último vaso de la casa.</q></p></div></li>
+          <li><button class="tc" type="button" data-t="9.6">0:07</button>
+            <div><p class="img">Todo desaparece y queda un reloj gigante con la hora real de Bolivia.</p>
+            <p class="snd">Segundero. Texto: <q>Son las 15:47. Todavía llegas.</q></p></div></li>
+          <li><button class="tc" type="button" data-t="13.6">0:11</button>
+            <div><p class="img">Una barra muestra el tiempo que queda hasta el corte.</p>
+            <p class="snd">Texto: <q>Te quedan 1 h 13 min. Pide antes de las 17:00. Llega hoy.</q></p></div></li>
+          <li><button class="tc" type="button" data-t="19">0:15</button>
+            <div><p class="img">El agua sube desde abajo y llena la pantalla.</p>
+            <p class="snd">Agua cayendo, tono que sube. Texto: <q>Envío gratis. Sin pedido mínimo.</q> Santa Cruz y Cochabamba.</p></div></li>
+          <li><button class="tc" type="button" data-t="20.8">0:20</button>
+            <div><p class="img">El agua cambia de color cinco veces, una por sabor: mocochinchi, tostada, canela, jamaica, tamarindo.</p>
+            <p class="snd">Un golpe grave por cada palabra. Texto fijo abajo: <q>Refrescos naturales.</q></p></div></li>
+          <li><button class="tc" type="button" data-t="29.5">0:26</button>
+            <div><p class="img">Azul limpio. Marca, frase y dirección web.</p>
+            <p class="snd">Un solo glug, esta vez lleno, y un acorde. Texto: <q>VitaSet. Llega antes que la sed.</q></p></div></li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>Un spot, dos finales</h2>
+        <p>La pauta digital permite cambiar el texto según la hora. Con un solo rodaje salen dos versiones, y cada persona ve la que le sirve.</p>
+        <div class="split">
+          <div class="card">
+            <h3>Antes de las 17:00</h3>
+            <p class="big">Todavía llegas.</p>
+            <p>Cuenta regresiva hasta el corte. Empuja a pedir ahora.</p>
+          </div>
+          <div class="card">
+            <h3>Después de las 17:00</h3>
+            <p class="big">Mañana amaneces con agua.</p>
+            <p>Convierte la hora perdida en un pedido para la primera entrega.</p>
+          </div>
+        </div>
+        <p>Para televisión o radio, donde la hora no se puede leer, se usa la versión de las 15:47 y se pauta por la tarde.</p>
+      </section>
+
+      <hr class="rule">
+
+      <section>
+        <p class="eyebrow">Segunda idea · Importadora Almanza · 30 segundos</p>
+        <h2>Póngalo y olvídese</h2>
+        <p>Un anuncio de repuestos que promete lo contrario de lo que promete cualquier tienda: que no vas a volver pronto. Un buen repuesto se nota porque uno deja de pensar en él.</p>
+        <ol class="guion">
+          <li><span class="tc">0:00</span>
+            <div><p class="img">Negro. 5:10 de la mañana. Un motor arranca al primer intento.</p>
+            <p class="snd">Texto: <q>¿Cuándo fue la última vez que pensaste en tu bomba de agua?</q></p></div></li>
+          <li><span class="tc">0:04</span>
+            <div><p class="img">Gente que no piensa en su auto: un trufi lleno subiendo una cuesta, un camión de noche rumbo a Santa Cruz, una mamá que llega a tiempo al colegio.</p>
+            <p class="snd">Voz: <q>Exacto.</q></p></div></li>
+          <li><span class="tc">0:09</span>
+            <div><p class="img">Dentro del motor. Piezas que giran limpias, sin drama.</p>
+            <p class="snd">Voz: <q>Un buen repuesto hace una sola cosa bien: desaparecer. Lo pones y te olvidas.</q></p></div></li>
+          <li><span class="tc">0:16</span>
+            <div><p class="img">Mostrador de Importadora Almanza en Quillacollo. El vendedor entrega una caja.</p>
+            <p class="snd">Cliente: <q>Nos vemos.</q> Vendedor, sonriendo: <q>Ojalá que no tan pronto.</q></p></div></li>
+          <li><span class="tc">0:23</span>
+            <div><p class="img">Logotipo sobre fondo liso.</p>
+            <p class="snd">Voz: <q>Importadora Almanza. Repuestos para autos pequeños y grandes. Cochabamba y Santa Cruz. Póngalo y olvídese.</q></p></div></li>
+        </ol>
+        <p>La pieza de la primera línea se cambia por la que más se vende en el mostrador.</p>
+      </section>
+
+      <section>
+        <h2>De dónde sale cada dato</h2>
+        <ul class="facts">
+          <li>VitaSet reparte agua purificada, refrescos naturales y dispensadores a domicilio en Santa Cruz y Cochabamba. Fuente: <a href="https://vitaset.es/">vitaset.es</a>.</li>
+          <li>Los cinco sabores, el envío gratis sin pedido mínimo y la entrega el mismo día pidiendo antes de las 17:00 salen de las fichas de producto, por ejemplo la del <a href="https://vitaset.es/productos/paquete-de-agua-3l-x6-7">paquete de 3 litros</a>.</li>
+          <li>Importadora Almanza vende repuestos de autos pequeños y grandes, con dirección en Quillacollo y sección de Santa Cruz. Fuente: <a href="https://importadora-almanza.com/">importadora-almanza.com</a>.</li>
+        </ul>
+        <p>Antes de producir hay que confirmar tres cosas. El corte de las 17:00 sigue vigente. El logotipo y los colores reales reemplazan la tipografía neutra que se usó aquí. Los precios quedaron fuera a propósito porque cambian.</p>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var W = 1080, H = 1920, DUR = 30;
+  var DISPLAY = '"Barlow Condensed","Arial Narrow",Impact,sans-serif';
+  var BODY = '"Barlow","Segoe UI",system-ui,sans-serif';
+  // Film palette. The film is a fixed look, like any video; it does not follow the page theme.
+  var C = {
+    heatTop:'#FFE7AE', heatBot:'#FFB254', cream:'#FFF5DE', ink:'#1A1206', heat:'#D9480F',
+    water1:'#2C93FF', water2:'#0A56B8', brand:'#0A63C9', white:'#FFFFFF',
+    bottle:'rgba(40,130,230,0.34)', bottleEdge:'#2A7FD9', disp:'#FFFFFF', dispShade:'#E6EDF3', tray:'#C3D0DB'
+  };
+  var FLAVORS = [
+    {name:'MOCOCHINCHI', color:'#B4660F'},
+    {name:'TOSTADA',     color:'#5E3210'},
+    {name:'CANELA',      color:'#9C4A22'},
+    {name:'JAMAICA',     color:'#9E1030'},
+    {name:'TAMARINDO',   color:'#74451A'}
+  ];
+
+  var cv = document.getElementById('film'), ctx = cv.getContext('2d');
+  var stage = document.getElementById('stage');
+  var bigplay = document.getElementById('bigplay'), btnPlay = document.getElementById('btn-play');
+  var btnSound = document.getElementById('btn-sound'), scrub = document.getElementById('scrub');
+  var tlabel = document.getElementById('tlabel'), hint = document.getElementById('mode-hint');
+  var mode = 'real', playing = false, t0 = 0, tNow = 9.6, raf = 0, soundOn = true, ac = null, master = null;
+
+  function clamp(v, a, b){ return v < a ? a : (v > b ? b : v); }
+  function seg(t, a, b){ return clamp((t - a) / (b - a), 0, 1); }
+  function ease(x){ return x * x * (3 - 2 * x); }
+  function lerp(a, b, x){ return a + (b - a) * x; }
+  function pad(n){ return (n < 10 ? '0' : '') + n; }
+
+  function boliviaNow(){
+    try {
+      var parts = new Intl.DateTimeFormat('en-GB', {timeZone:'America/La_Paz', hour:'2-digit', minute:'2-digit', hour12:false}).formatToParts(new Date());
+      var h = 0, m = 0;
+      parts.forEach(function(p){ if (p.type === 'hour') h = parseInt(p.value, 10) % 24; if (p.type === 'minute') m = parseInt(p.value, 10); });
+      return {h:h, m:m};
+    } catch (e) {
+      var d = new Date(), b = ((d.getUTCHours() * 60 + d.getUTCMinutes()) - 240 + 1440) % 1440; // Bolivia is UTC-4 all year
+      return {h:Math.floor(b / 60), m:b % 60};
+    }
+  }
+  function clock(){
+    var c = mode === 'antes' ? {h:15, m:47} : (mode === 'despues' ? {h:21, m:10} : boliviaNow());
+    var mins = c.h * 60 + c.m, left = 17 * 60 - mins;
+    c.before = left > 0; c.left = left; c.str = pad(c.h) + ':' + pad(c.m);
+    if (left >= 60) c.leftStr = Math.floor(left / 60) + ' h' + (left % 60 ? ' ' + (left % 60) + ' min' : '');
+    else c.leftStr = left + ' min';
+    return c;
+  }
+
+  function setFont(weight, size, family){ ctx.font = weight + ' ' + size + 'px ' + (family || DISPLAY); }
+  function txt(str, x, y, o){
+    var size = o.size, weight = o.weight || 900;
+    if ('letterSpacing' in ctx) ctx.letterSpacing = (o.ls || 0) + 'px';
+    setFont(weight, size, o.family);
+    if (o.maxW){ var w = ctx.measureText(str).width; if (w > o.maxW){ size = size * o.maxW / w; setFont(weight, size, o.family); } }
+    ctx.save();
+    ctx.globalAlpha = ctx.globalAlpha * (o.alpha == null ? 1 : o.alpha);
+    ctx.fillStyle = o.color; ctx.textAlign = o.align || 'center'; ctx.textBaseline = 'alphabetic';
+    if (o.scale && o.scale !== 1){ ctx.translate(x, y); ctx.scale(o.scale, o.scale); ctx.fillText(str, 0, 0); }
+    else ctx.fillText(str, x, y);
+    ctx.restore();
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+  }
+  function rr(x, y, w, h, r){
+    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+  }
+  function wave(yTop, t, amp){
+    ctx.beginPath(); ctx.moveTo(0, H + 10); ctx.lineTo(0, yTop);
+    for (var x = 0; x <= W; x += 30){
+      ctx.lineTo(x, yTop + Math.sin(x * 0.008 + t * 2.2) * amp + Math.sin(x * 0.019 - t * 3.1) * amp * 0.45);
+    }
+    ctx.lineTo(W, H + 10); ctx.closePath();
+  }
+  function bottlePath(){
+    var cx = 540, top = 470, bodyB = 1090, neckB = 1292, bw = 250, nw = 72, r = 70;
+    ctx.beginPath();
+    ctx.moveTo(cx - bw + r, top); ctx.lineTo(cx + bw - r, top); ctx.quadraticCurveTo(cx + bw, top, cx + bw, top + r);
+    ctx.lineTo(cx + bw, bodyB);
+    ctx.bezierCurveTo(cx + bw, bodyB + 100, cx + nw, bodyB + 70, cx + nw, bodyB + 150);
+    ctx.lineTo(cx + nw, neckB); ctx.lineTo(cx - nw, neckB); ctx.lineTo(cx - nw, bodyB + 150);
+    ctx.bezierCurveTo(cx - nw, bodyB + 70, cx - bw, bodyB + 100, cx - bw, bodyB);
+    ctx.lineTo(cx - bw, top + r); ctx.quadraticCurveTo(cx - bw, top, cx - bw + r, top); ctx.closePath();
+  }
+
+  // Deterministic bubbles for the water scenes.
+  var BUB = [];
+  (function(){ var s = 7; function rnd(){ s = (s * 16807) % 2147483647; return s / 2147483647; }
+    for (var i = 0; i < 46; i++) BUB.push({x: rnd() * W, v: 260 + rnd() * 420, r: 6 + rnd() * 20, p: rnd() * 2400, w: rnd() * 6}); })();
+  function bubbles(t, topY, alpha){
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 4;
+    BUB.forEach(function(b){
+      var y = H + 60 - ((t * b.v + b.p) % (H + 260));
+      if (y < topY + 40) return;
+      ctx.beginPath(); ctx.arc(b.x + Math.sin(t * 1.7 + b.w) * 18, y, b.r, 0, Math.PI * 2); ctx.stroke();
+    });
+    ctx.restore();
+  }
+
+  var GLUGS = [0.6, 1.5, 2.8];
+  function sceneHeat(t){
+    var g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, C.heatTop); g.addColorStop(1, C.heatBot);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    var sun = ctx.createRadialGradient(900, 180, 20, 900, 180, 620);
+    sun.addColorStop(0, 'rgba(255,255,255,0.85)'); sun.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = sun; ctx.fillRect(0, 0, W, H);
+
+    var out = ease(seg(t, 6.5, 7.3));
+    ctx.save(); ctx.globalAlpha = 1 - out; ctx.translate(0, out * 260);
+
+    // dispenser
+    ctx.fillStyle = C.disp; rr(230, 1292, 620, 760, 46); ctx.fill();
+    ctx.fillStyle = C.dispShade; rr(330, 1420, 420, 300, 26); ctx.fill();
+    rr(396, 1262, 288, 52, 18); ctx.fill();
+    ctx.fillStyle = C.tray; rr(330, 1700, 420, 30, 10); ctx.fill();
+    ctx.fillStyle = '#1E7BE0'; rr(430, 1462, 64, 96, 14); ctx.fill();
+    ctx.fillStyle = '#D8412F'; rr(586, 1462, 64, 96, 14); ctx.fill();
+
+    // water left in the bottle
+    var f = t < 0.6 ? 0.17 : t < 1.5 ? lerp(0.17, 0.11, ease(seg(t, 0.6, 1.0))) : t < 2.8 ? lerp(0.11, 0.055, ease(seg(t, 1.5, 1.9))) : lerp(0.055, 0, ease(seg(t, 2.8, 3.5)));
+    var level = 1292 - f * 780;
+    ctx.save(); bottlePath(); ctx.clip();
+    ctx.fillStyle = C.bottle; ctx.fillRect(0, 400, W, 1000);
+    if (f > 0.001){
+      ctx.fillStyle = '#1F86F2';
+      ctx.beginPath(); ctx.moveTo(0, 1400); ctx.lineTo(0, level);
+      for (var x = 0; x <= W; x += 40) ctx.lineTo(x, level + Math.sin(x * 0.02 + t * 5) * 5);
+      ctx.lineTo(W, 1400); ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.28)'; ctx.fillRect(340, 400, 46, 1000);
+    ctx.restore();
+    ctx.strokeStyle = C.bottleEdge; ctx.lineWidth = 7; bottlePath(); ctx.stroke();
+    ctx.globalAlpha = (1 - out) * 0.5; ctx.lineWidth = 5;
+    [640, 800, 960].forEach(function(y){ ctx.beginPath(); ctx.moveTo(296, y); ctx.lineTo(784, y); ctx.stroke(); });
+    ctx.globalAlpha = 1 - out;
+
+    // glug bubbles climbing the empty bottle
+    GLUGS.forEach(function(gt, i){
+      var k = seg(t, gt, gt + 0.9); if (k <= 0 || k >= 1) return;
+      for (var j = 0; j < 3; j++){
+        var by = lerp(1240, 620 + j * 70, ease(k)), bx = 540 + (j - 1) * 46 + Math.sin(k * 9 + j) * 14;
+        ctx.save(); ctx.globalAlpha = (1 - out) * (1 - k) * 0.9; ctx.strokeStyle = C.bottleEdge; ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.arc(bx, by, 26 - j * 6 + i * 3, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+      }
+    });
+
+    // the last drop
+    var d = seg(t, 3.9, 4.4);
+    if (d > 0 && d < 1){
+      var dy = lerp(1566, 1690, d * d);
+      ctx.fillStyle = '#1F86F2'; ctx.beginPath(); ctx.moveTo(462, dy - 22); ctx.quadraticCurveTo(478, dy + 2, 462, dy + 12); ctx.quadraticCurveTo(446, dy + 2, 462, dy - 22); ctx.fill();
+    }
+    var sp = seg(t, 4.4, 4.9);
+    if (sp > 0 && sp < 1){
+      ctx.save(); ctx.globalAlpha = (1 - out) * (1 - sp); ctx.strokeStyle = '#1F86F2'; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.ellipse(462, 1700, 20 + sp * 70, 5 + sp * 10, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+    }
+    ctx.restore();
+
+    var a1 = ease(seg(t, 0.75, 1.05)) * (1 - seg(t, 3.3, 3.6));
+    if (a1 > 0) txt('Ese sonido.', 540, 330, {size:200, color:C.ink, alpha:a1, maxW:940});
+    var a2 = ease(seg(t, 3.7, 4.0)) * (1 - seg(t, 6.4, 6.9));
+    if (a2 > 0){
+      txt('El último vaso', 540, 250, {size:158, color:C.ink, alpha:a2, maxW:940});
+      txt('de la casa.', 540, 400, {size:158, color:C.heat, alpha:ease(seg(t, 4.4, 4.7)) * (1 - seg(t, 6.4, 6.9)), maxW:940});
+    }
+  }
+
+  function sceneClock(t, c){
+    var a = ease(seg(t, 6.7, 7.4));
+    ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = C.cream; ctx.fillRect(0, 0, W, H); ctx.restore();
+    if (a <= 0) return;
+    ctx.save(); ctx.globalAlpha = a;
+
+    var live = mode === 'real';
+    var label = (live ? 'EN VIVO · ' : 'EJEMPLO · ') + 'HORA EN BOLIVIA';
+    if (live){
+      ctx.save(); ctx.globalAlpha = a * (0.45 + 0.55 * Math.abs(Math.sin(t * 3))); ctx.fillStyle = C.heat;
+      ctx.beginPath(); ctx.arc(540, 330, 13, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    }
+    txt(label, 540, 420, {size:44, weight:600, color:C.ink, alpha:0.72, ls:7, maxW:900});
+
+    // giant digits, sized to the frame whatever font ends up loaded
+    var size = 440; setFont(900, size);
+    var w2 = ctx.measureText('00').width, gap = size * 0.24, total = w2 * 2 + gap;
+    if (total > 950){ size = size * 950 / total; setFont(900, size); w2 = ctx.measureText('00').width; gap = size * 0.24; }
+    var pop = 1 + 0.06 * (1 - ease(seg(t, 7.2, 7.7)));
+    ctx.save(); ctx.translate(540, 900); ctx.scale(pop, pop); ctx.translate(-540, -900);
+    txt(pad(c.h), 540 - gap / 2, 900, {size:size, color:C.ink, align:'right'});
+    txt(pad(c.m), 540 + gap / 2, 900, {size:size, color:C.ink, align:'left'});
+    txt(':', 540, 900 - size * 0.05, {size:size, color:C.ink, alpha:(Math.floor(t * 2) % 2 === 0 || !playing) ? 1 : 0.18});
+    ctx.restore();
+
+    var l1 = ease(seg(t, 8.0, 8.3));
+    if (l1 > 0) txt('Son las ' + c.str + '.', 540, 1090, {size:98, weight:800, color:C.ink, alpha:l1});
+    var l2 = ease(seg(t, 8.8, 9.1));
+    if (l2 > 0) txt(c.before ? 'Todavía llegas.' : 'El corte fue a las 17:00.', 540, 1250, {size:176, color:C.heat, alpha:l2, maxW:950, scale:1 + 0.08 * (1 - l2)});
+
+    if (c.before){
+      var b = ease(seg(t, 11.0, 11.5));
+      if (b > 0){
+        ctx.save(); ctx.globalAlpha = a * b;
+        ctx.fillStyle = 'rgba(26,18,6,0.14)'; rr(110, 1372, 860, 30, 15); ctx.fill();
+        var frac = clamp(c.left / 540, 0.04, 1) * ease(seg(t, 11.1, 12.0));
+        ctx.fillStyle = C.heat; rr(110, 1372, Math.max(30, 860 * frac), 30, 15); ctx.fill();
+        ctx.restore();
+        txt('Te quedan ' + c.leftStr, 110, 1478, {size:66, weight:800, color:C.ink, alpha:b, align:'left', maxW:620});
+        txt('17:00', 970, 1478, {size:66, weight:800, color:C.ink, alpha:b * 0.6, align:'right'});
+      }
+      var p = ease(seg(t, 12.3, 12.6));
+      if (p > 0) txt('Pide antes de las 17:00.', 540, 1640, {size:104, color:C.ink, alpha:p, maxW:950});
+      var q = ease(seg(t, 13.0, 13.3));
+      if (q > 0) txt('Llega hoy.', 540, 1800, {size:170, color:C.heat, alpha:q, scale:1 + 0.1 * (1 - q)});
+    } else {
+      var p2 = ease(seg(t, 11.0, 11.3));
+      if (p2 > 0) txt('Pídelo ahora.', 540, 1500, {size:176, color:C.ink, alpha:p2, maxW:950, scale:1 + 0.08 * (1 - p2)});
+      var q2 = ease(seg(t, 12.3, 12.6));
+      if (q2 > 0){
+        txt('Mañana amaneces', 540, 1670, {size:128, color:C.heat, alpha:q2, maxW:950});
+        txt('con agua.', 540, 1800, {size:128, color:C.heat, alpha:q2, maxW:950});
+      }
+    }
+    ctx.restore();
+  }
+
+  function sceneWater(t){
+    if (t < 15) return;
+    var top = lerp(H + 90, -180, ease(seg(t, 15, 18.2)));
+    var g = ctx.createLinearGradient(0, Math.max(top, 0), 0, H); g.addColorStop(0, C.water1); g.addColorStop(1, C.water2);
+    ctx.fillStyle = g; wave(top, t, 34); ctx.fill();
+    bubbles(t, top, 1 - seg(t, 19.6, 20.2));
+    var out = 1 - seg(t, 19.5, 19.95);
+    var a = ease(seg(t, 17.0, 17.3)) * out;
+    if (a > 0) txt('Envío gratis.', 540, 800, {size:216, color:C.white, alpha:a, maxW:950, scale:1 + 0.08 * (1 - ease(seg(t, 17.0, 17.3)))});
+    var b = ease(seg(t, 17.7, 18.0)) * out;
+    if (b > 0) txt('Sin pedido mínimo.', 540, 990, {size:150, color:C.white, alpha:b, maxW:950});
+    var c = ease(seg(t, 18.4, 18.7)) * out;
+    if (c > 0) txt('SANTA CRUZ · COCHABAMBA', 540, 1130, {size:54, weight:600, color:C.white, alpha:c * 0.9, ls:6, maxW:900});
+  }
+
+  function sceneFlavors(t){
+    if (t < 20) return;
+    var STEP = 1.2;
+    FLAVORS.forEach(function(f, i){
+      var s = 20 + i * STEP; if (t < s) return;
+      var top = lerp(H + 90, -180, ease(seg(t, s, s + 0.38)));
+      ctx.fillStyle = f.color; wave(top, t * 1.4 + i, 40); ctx.fill();
+    });
+    var i = Math.min(FLAVORS.length - 1, Math.floor((t - 20) / STEP)), local = t - 20 - i * STEP;
+    var end = 1 - seg(t, 25.95, 26.3);
+    var a = ease(seg(local, 0.14, 0.3)) * (i < FLAVORS.length - 1 ? 1 - seg(local, 1.06, 1.2) : 1) * end;
+    bubbles(t, -200, 0.5 * end);
+    if (a > 0) txt(FLAVORS[i].name, 540, 1010, {size:300, color:C.white, alpha:a, maxW:980, scale:1 + 0.16 * (1 - ease(seg(local, 0.14, 0.34)))});
+    var cap = ease(seg(t, 20.3, 20.7)) * end;
+    if (cap > 0){
+      txt('REFRESCOS NATURALES', 540, 1640, {size:62, weight:800, color:C.white, alpha:cap * 0.92, ls:8, maxW:900});
+      for (var k = 0; k < FLAVORS.length; k++){
+        ctx.save(); ctx.globalAlpha = cap * (k === i ? 1 : 0.35); ctx.fillStyle = C.white;
+        rr(540 - 190 + k * 80, 1700, 60, 10, 5); ctx.fill(); ctx.restore();
+      }
+    }
+  }
+
+  function sceneEnd(t){
+    if (t < 26) return;
+    var top = lerp(H + 90, -180, ease(seg(t, 26, 26.5)));
+    var g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#1272DE'); g.addColorStop(1, C.water2);
+    ctx.fillStyle = g; wave(top, t, 36); ctx.fill();
+    bubbles(t * 0.5, 1300, 0.35 * seg(t, 26.4, 27));
+    var a = ease(seg(t, 26.6, 27.0));
+    if (a > 0) txt('VitaSet', 540, 860, {size:330, color:C.white, alpha:a, maxW:860, scale:1 + 0.06 * (1 - a)});
+    var b = ease(seg(t, 27.3, 27.7));
+    if (b > 0) txt('Llega antes que la sed.', 540, 1030, {size:124, weight:800, color:C.white, alpha:b, maxW:900});
+    var c = ease(seg(t, 28.0, 28.4));
+    if (c > 0) txt('Agua purificada · Refrescos naturales · Dispensadores', 540, 1140, {size:42, weight:500, family:BODY, color:C.white, alpha:c * 0.9, maxW:900});
+    var d = ease(seg(t, 28.5, 28.9));
+    if (d > 0){
+      txt('vitaset.es', 540, 1650, {size:92, weight:800, color:C.white, alpha:d});
+      txt('SANTA CRUZ · COCHABAMBA', 540, 1740, {size:42, weight:600, color:C.white, alpha:d * 0.8, ls:6, maxW:800});
+    }
+  }
+
+  function draw(t){
+    var s = cv.width / W;
+    ctx.setTransform(s, 0, 0, s, 0, 0);
+    ctx.globalAlpha = 1; ctx.clearRect(0, 0, W, H);
+    var c = clock();
+    if (t < 7.5) sceneHeat(t);
+    if (t >= 6.7 && t < 18.4) sceneClock(t, c);
+    sceneWater(t); sceneFlavors(t); sceneEnd(t);
+  }
+
+  function resize(){
+    var r = stage.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+    if (cv.width !== w || cv.height !== h){ cv.width = w; cv.height = h; }
+    draw(tNow);
+  }
+
+  // ---- sound: everything is synthesised, nothing is downloaded ----
+  function tone(at, f0, f1, dur, gain, type, attack){
+    var o = ac.createOscillator(), g = ac.createGain(); o.type = type || 'sine';
+    o.frequency.setValueAtTime(f0, at); o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), at + dur);
+    g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(gain, at + (attack || 0.012));
+    g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+    o.connect(g); g.connect(master); o.start(at); o.stop(at + dur + 0.05);
+  }
+  function noise(at, dur, gain, f0, f1, q){
+    var n = Math.floor(ac.sampleRate * dur), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    var src = ac.createBufferSource(); src.buffer = buf;
+    var bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = q || 1;
+    bp.frequency.setValueAtTime(f0, at); bp.frequency.exponentialRampToValueAtTime(f1, at + dur);
+    var g = ac.createGain(); g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(gain, at + Math.min(0.4, dur * 0.3));
+    g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+    src.connect(bp); bp.connect(g); g.connect(master); src.start(at); src.stop(at + dur + 0.05);
+  }
+  function glug(at, deep){ tone(at, 190 * deep, 95 * deep, 0.10, 0.55); tone(at + 0.08, 105 * deep, 270 * deep, 0.16, 0.5); }
+  function startAudio(){
+    var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    try {
+      ac = new AC(); master = ac.createGain(); master.gain.value = 0.8; master.connect(ac.destination);
+      var z = ac.currentTime + 0.06;
+      glug(z + 0.6, 1); glug(z + 1.5, 0.86); glug(z + 2.8, 0.7);
+      tone(z + 4.4, 1500, 720, 0.14, 0.35);
+      for (var s = 7.5; s < 14.6; s += 1) noise(z + s, 0.035, 0.22, 3200, 3200, 9);
+      noise(z + 15, 4.2, 0.3, 280, 2600, 1.1); tone(z + 15, 98, 196, 4.2, 0.16, 'sine', 1.2);
+      for (var i = 0; i < 5; i++) tone(z + 20 + i * 1.2, 130, 44, 0.3, 0.8);
+      glug(z + 26.1, 1.25);
+      [261.63, 329.63, 392.0, 523.25].forEach(function(f){ tone(z + 26.5, f, f, 3.4, 0.09, 'sine', 0.5); });
+    } catch (e) { ac = null; }
+  }
+  function stopAudio(){ if (ac){ try { master.gain.value = 0; ac.close(); } catch (e) {} ac = null; master = null; } }
+
+  // ---- transport ----
+  function fmt(t){ var s = Math.floor(t); return '0:' + pad(s); }
+  function ui(){
+    scrub.value = tNow; tlabel.textContent = fmt(tNow) + ' / 0:30';
+    bigplay.hidden = playing; btnPlay.textContent = playing ? 'Detener' : 'Reproducir';
+    var c = clock();
+    hint.textContent = mode === 'real'
+      ? 'Ahora en Bolivia son las ' + c.str + '. El spot muestra el final de ' + (c.before ? 'antes' : 'después') + ' de las 17:00.'
+      : 'Vista de ejemplo con la hora fija en ' + c.str + '.';
+  }
+  function frame(now){
+    tNow = (now - t0) / 1000;
+    if (tNow >= DUR){ tNow = DUR - 0.05; stop(); return; }
+    draw(tNow); scrub.value = tNow; tlabel.textContent = fmt(tNow) + ' / 0:30';
+    raf = requestAnimationFrame(frame);
+  }
+  function play(){
+    stop(); if (soundOn) startAudio();
+    playing = true; t0 = performance.now(); ui(); raf = requestAnimationFrame(frame);
+  }
+  function stop(){ playing = false; cancelAnimationFrame(raf); stopAudio(); draw(tNow); ui(); }
+  function show(t){ stop(); tNow = clamp(t, 0, DUR - 0.05); draw(tNow); ui(); }
+
+  bigplay.addEventListener('click', play);
+  btnPlay.addEventListener('click', function(){ playing ? stop() : play(); });
+  btnSound.addEventListener('click', function(){
+    soundOn = !soundOn; btnSound.setAttribute('aria-pressed', String(soundOn)); btnSound.textContent = 'Sonido: ' + (soundOn ? 'sí' : 'no');
+    if (!soundOn) stopAudio();
+  });
+  scrub.addEventListener('input', function(){ show(parseFloat(scrub.value)); });
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="mode"]'), function(r){
+    r.addEventListener('change', function(){ if (r.checked){ mode = r.value; draw(tNow); ui(); } });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('button.tc'), function(b){
+    b.addEventListener('click', function(){
+      show(parseFloat(b.getAttribute('data-t')));
+      var smooth = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      stage.scrollIntoView({block:'nearest', behavior: smooth ? 'smooth' : 'auto'});
+    });
+  });
+
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(stage); else window.addEventListener('resize', resize);
+  setInterval(function(){ if (!playing){ draw(tNow); ui(); } }, 15000);
+  if (document.fonts && document.fonts.load){
+    Promise.all([document.fonts.load('900 100px "Barlow Condensed"'), document.fonts.load('800 100px "Barlow Condensed"'),
+      document.fonts.load('600 100px "Barlow Condensed"'), document.fonts.load('500 40px "Barlow"')]).then(function(){ draw(tNow); }, function(){});
+  }
+  resize(); ui();
+})();
+</script>
